@@ -22,10 +22,46 @@ const generateFakeIp = () => {
   return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
 };
 
+interface SavedConnectionState {
+  status: VpnStatus;
+  ipAddress: string;
+}
+
+const STORAGE_KEY = 'vpn-connection-state';
+
+const loadConnectionState = (): SavedConnectionState | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveConnectionState = (state: SavedConnectionState) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Silently fail if localStorage is unavailable
+  }
+};
+
+const clearConnectionState = () => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Silently fail if localStorage is unavailable
+  }
+};
+
 export function useVpnSimulation() {
-  const [status, setStatus] = useState<VpnStatus>('disconnected');
+  const savedState = loadConnectionState();
+  const [status, setStatus] = useState<VpnStatus>(savedState?.status || 'disconnected');
   const [activeServer, setActiveServer] = useState<VpnServer>(DEMO_SERVERS[0]);
-  const [ipAddress, setIpAddress] = useState<string>('---.---.---.---');
+  const [ipAddress, setIpAddress] = useState<string>(savedState?.ipAddress || '---.---.---.---');
   const [connectionTime, setConnectionTime] = useState<number>(0);
   
   // Speeds in Mbps
@@ -37,15 +73,20 @@ export function useVpnSimulation() {
       setStatus('connecting');
       // Simulate connection delay
       setTimeout(() => {
+        const newIp = generateFakeIp();
         setStatus('connected');
-        setIpAddress(generateFakeIp());
+        setIpAddress(newIp);
         setConnectionTime(0);
+        // Save connection state to localStorage
+        saveConnectionState({ status: 'connected', ipAddress: newIp });
       }, 2500 + Math.random() * 1000); // 2.5s - 3.5s delay
     } else {
       setStatus('disconnected');
       setIpAddress('---.---.---.---');
       setConnectionTime(0);
       setSpeeds({ download: 0, upload: 0 });
+      // Clear saved connection state
+      clearConnectionState();
     }
   }, [status]);
 
