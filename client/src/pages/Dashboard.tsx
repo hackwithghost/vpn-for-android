@@ -78,21 +78,6 @@ export default function Dashboard() {
           />
         </div>
       </main>
-
-      {/* Demo Disclaimer Footer */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="absolute bottom-6 left-0 right-0 flex justify-center z-10"
-      >
-        <div className="glass-panel px-4 py-2 rounded-full border border-amber-500/30 bg-amber-500/5">
-          <span className="text-xs font-medium text-amber-500/80 uppercase tracking-widest flex items-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-2 animate-pulse" />
-            Demo UI only – not a real VPN
-          </span>
-        </div>
-      </motion.div>
     </div>
   );
 }
