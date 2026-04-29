@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export function serveStatic(app: express.Express) {
-  // dist/public path (Vite build output)
+  // Vite build output path
   const distPath = path.resolve(__dirname, "../dist/public");
 
   if (!fs.existsSync(distPath)) {
@@ -17,10 +17,11 @@ export function serveStatic(app: express.Express) {
     );
   }
 
+  // serve static files
   app.use(express.static(distPath));
 
-  // SPA fallback
-  app.get("*", (_req, res) => {
+  // ✅ Express v5 compatible SPA fallback
+  app.get("/:path(*)", (_req, res) => {
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
