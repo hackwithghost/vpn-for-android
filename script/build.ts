@@ -44,15 +44,15 @@ async function buildAll() {
     ...Object.keys(pkg.devDependencies || {}),
   ];
 
-  const externals = allDeps; // 🔥 CHANGE: don't bundle deps
+  const externals = allDeps;
 
   await esbuild({
     entryPoints: ["server/index.ts"],
     platform: "node",
     bundle: true,
 
-    // ✅ CRITICAL FIX
-    format: "cjs",
+    // ✅ FIX: ESM output
+    format: "esm",
     outfile: "dist/index.js",
 
     target: "node20",
@@ -61,7 +61,6 @@ async function buildAll() {
       "process.env.NODE_ENV": '"production"',
     },
 
-    minify: true,
     external: externals,
     logLevel: "info",
   });
