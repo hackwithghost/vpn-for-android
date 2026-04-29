@@ -2,7 +2,6 @@ import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import { rm, readFile } from "fs/promises";
 
-// server deps to bundle
 const allowlist = [
   "@google/generative-ai",
   "axios",
@@ -32,7 +31,6 @@ const allowlist = [
 ];
 
 async function buildAll() {
-  // साफ dist
   await rm("dist", { recursive: true, force: true });
 
   console.log("🔨 building client...");
@@ -46,15 +44,15 @@ async function buildAll() {
     ...Object.keys(pkg.devDependencies || {}),
   ];
 
-  const externals = allDeps.filter((dep) => !allowlist.includes(dep));
+  const externals = allDeps; // 🔥 CHANGE: don't bundle deps
 
   await esbuild({
     entryPoints: ["server/index.ts"],
     platform: "node",
     bundle: true,
 
-    // ✅ IMPORTANT CHANGE
-    format: "esm",
+    // ✅ CRITICAL FIX
+    format: "cjs",
     outfile: "dist/index.js",
 
     target: "node20",
